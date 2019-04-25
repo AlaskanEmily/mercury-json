@@ -783,13 +783,6 @@
 %     Mercury Type      JSON
 %     ------------      ----
 %     int               number (cannot have a fractional part)
-%     int8              number (any fractional part is ignored)
-%     int16             number (any fractional part is ignored)
-%     int32             number (any fractional part is ignored)
-%     int64             string
-%     uint8             number (any fractional part is ignored)
-%     uint16            number (any fractional part is ignored)
-%     uint64            string
 %     string            string
 %     float             number (only finite floats can be converted)
 %     char              string (of length 1)
@@ -848,13 +841,6 @@
 
 :- instance to_json(bag(T)) <= to_json(T).
 :- instance to_json(int).
-:- instance to_json(int8).
-:- instance to_json(int16).
-:- instance to_json(int32).
-:- instance to_json(int64).
-:- instance to_json(uint8).
-:- instance to_json(uint16).
-:- instance to_json(uint64).
 :- instance to_json(float).
 :- instance to_json(string).
 :- instance to_json(char).
@@ -899,13 +885,6 @@
 
 :- instance from_json(bag(T)) <= from_json(T).
 :- instance from_json(int).
-:- instance from_json(int8).
-:- instance from_json(int16).
-:- instance from_json(int32).
-:- instance from_json(int64).
-:- instance from_json(uint8).
-:- instance from_json(uint16).
-:- instance from_json(uint64).
 :- instance from_json(float).
 :- instance from_json(char).
 :- instance from_json(string).
@@ -1343,27 +1322,6 @@ from_type(T) = to_json(T).
 :- instance to_json(int) where [
     func(to_json/1) is json.marshal.int_to_json
 ].
-:- instance to_json(int8) where [
-    func(to_json/1) is json.marshal.int8_to_json
-].
-:- instance to_json(int16) where [
-    func(to_json/1) is json.marshal.int16_to_json
-].
-:- instance to_json(int32) where [
-    func(to_json/1) is json.marshal.int32_to_json
-].
-:- instance to_json(int64) where [
-    func(to_json/1) is json.marshal.int64_to_json
-].
-:- instance to_json(uint8) where [
-    func(to_json/1) is json.marshal.uint8_to_json
-].
-:- instance to_json(uint16) where [
-    func(to_json/1) is json.marshal.uint16_to_json
-].
-:- instance to_json(uint64) where [
-    func(to_json/1) is json.marshal.uint64_to_json
-].
 :- instance to_json(float) where [
     func(to_json/1) is json.marshal.float_to_json
 ].
@@ -1465,27 +1423,6 @@ from_type(T) = to_json(T).
 ].
 :- instance from_json(int) where [
     func(from_json/1) is json.unmarshal.int_from_json
-].
-:- instance from_json(int8) where [
-    func(from_json/1) is json.unmarshal.int8_from_json
-].
-:- instance from_json(int16) where [
-    func(from_json/1) is json.unmarshal.int16_from_json
-].
-:- instance from_json(int32) where [
-    func(from_json/1) is json.unmarshal.int32_from_json
-].
-:- instance from_json(int64) where [
-    func(from_json/1) is json.unmarshal.int64_from_json
-].
-:- instance from_json(uint8) where [
-    func(from_json/1) is json.unmarshal.uint8_from_json
-].
-:- instance from_json(uint16) where [
-    func(from_json/1) is json.unmarshal.uint16_from_json
-].
-:- instance from_json(uint64) where [
-    func(from_json/1) is json.unmarshal.uint64_from_json
 ].
 :- instance from_json(float) where [
     func(from_json/1) is json.unmarshal.float_from_json

@@ -17,13 +17,6 @@
 
 :- func bag_from_json(value) = maybe_error(bag(T)) <= from_json(T).
 :- func int_from_json(value) = maybe_error(int).
-:- func int8_from_json(value) = maybe_error(int8).
-:- func int16_from_json(value) = maybe_error(int16).
-:- func int32_from_json(value) = maybe_error(int32).
-:- func int64_from_json(value) = maybe_error(int64).
-:- func uint8_from_json(value) = maybe_error(uint8).
-:- func uint16_from_json(value) = maybe_error(uint16).
-:- func uint64_from_json(value) = maybe_error(uint64).
 :- func float_from_json(value) = maybe_error(float).
 :- func char_from_json(value) = maybe_error(char).
 :- func string_from_json(value) = maybe_error(string).
@@ -72,12 +65,7 @@
 
 :- implementation.
 
-:- import_module int8.
-:- import_module int16.
-:- import_module int32.
 :- import_module type_desc.
-:- import_module uint8.
-:- import_module uint16.
 
 %-----------------------------------------------------------------------------%
 
@@ -111,13 +99,23 @@ add_values_and_counts([], Bag, ok(Bag)).
 add_values_and_counts([VC | VCs], !.Bag, Result) :-
     VC = Value - Count,
     ( if Count > 0 then
-        bag.det_insert_duplicates(Count, Value, !Bag),
+        add_value_n_times(Count, Value, !Bag),
         add_values_and_counts(VCs, !.Bag, Result)
     else
         string.format("value '%s' count is less than 1", [s(string(Value))],
             Msg),
         Result = error(Msg)
     ).
+
+:- pred add_value_n_times(int::in, T::in, bag(T)::in, bag(T)::out) is det.
+
+add_value_n_times(N, Value, !Bag) :-
+    ( if N > 0 then
+        bag.insert(Value, !Bag),
+        add_value_n_times(N - 1, Value, !Bag)
+    else
+        true
+).
 
 %-----------------------------------------------------------------------------%
 
@@ -128,121 +126,6 @@ int_from_json(Value) = Result :-
     else
         TypeDesc = type_desc_from_result(Result),
         ErrorMsg = make_conv_error_msg(TypeDesc, Value, "number"),
-        Result = error(ErrorMsg)
-    ).
-
-int8_from_json(Value) = Result :-
-    ( if Value = number(Number) then
-        Int = truncate_to_int(Number),
-        ( if int8.from_int(Int, Int8) then
-            Result = ok(Int8)
-        else
-            ErrorMsg = make_int_conv_bounds_error_msg("int8"),
-            Result = error(ErrorMsg)
-        )
-    else
-        TypeDesc = type_desc_from_result(Result),
-        ErrorMsg = make_conv_error_msg(TypeDesc, Value, "number"),
-        Result = error(ErrorMsg)
-    ).
-
-int16_from_json(Value) = Result :-
-    ( if Value = number(Number) then
-        Int = truncate_to_int(Number),
-        ( if int16.from_int(Int, Int16) then
-            Result = ok(Int16)
-        else
-            ErrorMsg = make_int_conv_bounds_error_msg("int16"),
-            Result = error(ErrorMsg)
-        )
-    else
-        TypeDesc = type_desc_from_result(Result),
-        ErrorMsg = make_conv_error_msg(TypeDesc, Value, "number"),
-        Result = error(ErrorMsg)
-    ).
-
-int32_from_json(Value) = Result :-
-    ( if Value = number(Number) then
-        Int = truncate_to_int(Number),
-        ( if int32.from_int(Int, Int32) then
-            Result = ok(Int32)
-        else
-            ErrorMsg = make_int_conv_bounds_error_msg("int32"),
-            Result = error(ErrorMsg)
-        )
-    else
-        TypeDesc = type_desc_from_result(Result),
-        ErrorMsg = make_conv_error_msg(TypeDesc, Value, "number"),
-        Result = error(ErrorMsg)
-    ).
-
-int64_from_json(Value) = Result :-
-    ( if Value = string(NumberStr) then
-        ( if integer.from_string(NumberStr, Number) then
-            ( if integer.to_int64(Number, Int64) then
-                Result = ok(Int64)
-            else
-                ErrorMsg = make_int_conv_bounds_error_msg("int64"),
-                Result = error(ErrorMsg)
-            )
-        else
-            TypeDesc = type_desc_from_result(Result),
-            ErrorMsg = make_string_conv_error_msg(TypeDesc, "int64"),
-            Result = error(ErrorMsg)
-        )
-    else
-        TypeDesc = type_desc_from_result(Result),
-        ErrorMsg = make_conv_error_msg(TypeDesc, Value, "string"),
-        Result = error(ErrorMsg)
-    ).
-
-uint8_from_json(Value) = Result :-
-    ( if Value = number(Number) then
-        Int = truncate_to_int(Number),
-        ( if uint8.from_int(Int, UInt8) then
-            Result = ok(UInt8)
-        else
-            ErrorMsg = make_int_conv_bounds_error_msg("uint8"),
-            Result = error(ErrorMsg)
-        )
-    else
-        TypeDesc = type_desc_from_result(Result),
-        ErrorMsg = make_conv_error_msg(TypeDesc, Value, "number"),
-        Result = error(ErrorMsg)
-    ).
-
-uint16_from_json(Value) = Result :-
-    ( if Value = number(Number) then
-        Int = truncate_to_int(Number),
-        ( if uint16.from_int(Int, UInt16) then
-            Result = ok(UInt16)
-        else
-            ErrorMsg = make_int_conv_bounds_error_msg("uint16"),
-            Result = error(ErrorMsg)
-        )
-    else
-        TypeDesc = type_desc_from_result(Result),
-        ErrorMsg = make_conv_error_msg(TypeDesc, Value, "number"),
-        Result = error(ErrorMsg)
-    ).
-
-uint64_from_json(Value) = Result :-
-    ( if Value = string(NumberStr) then
-        ( if integer.from_string(NumberStr, Number) then
-            ( if integer.to_uint64(Number, UInt64) then
-                Result = ok(UInt64)
-            else
-                ErrorMsg = make_int_conv_bounds_error_msg("uint64"),
-                Result = error(ErrorMsg)
-            )
-        else
-            TypeDesc = type_desc_from_result(Result),
-            ErrorMsg = make_string_conv_error_msg(TypeDesc, "uint64"),
-            Result = error(ErrorMsg)
-        )
-    else
-        TypeDesc = type_desc_from_result(Result),
-        ErrorMsg = make_conv_error_msg(TypeDesc, Value, "string"),
         Result = error(ErrorMsg)
     ).
 
